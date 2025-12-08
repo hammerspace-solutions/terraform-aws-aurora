@@ -24,14 +24,16 @@
 output "aurora_cluster_id" {
   description = "ID of the Aurora cluster"
   value       = aws_rds_cluster.aurora.id
+  sensitive   = true
 }
 
 output "aurora_cluster_arn" {
   description = "ARN of the Aurora cluster"
   value       = aws_rds_cluster.aurora.arn
+  sensitive   = true
 }
 
-output "aurora_endpoint" {
+output "aurora_cluster_endpoint" {
   description = "Writer endpoint for the Aurora cluster"
   value       = aws_rds_cluster.aurora.endpoint
 }
@@ -49,4 +51,5 @@ output "aurora_security_group_id" {
 output "aurora_subnet_group_name" {
   description = "DB subnet group name used by Aurora"
   value       = aws_db_subnet_group.aurora_subnets.name
+  sensitive   = true
 }
