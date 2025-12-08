@@ -30,7 +30,7 @@ data "aws_vpc" "this" {
 # Lowercase the project name for those resources that require it
 
 locals {
-  project_name_lower    = ${lower(var.project_name)}
+  project_name_lower    = "${lower(var.project_name)}"
 }
 
 # Do we need aurora events?
