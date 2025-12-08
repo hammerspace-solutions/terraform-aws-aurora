@@ -170,6 +170,22 @@ variable "kms_key_id" {
   default     = ""
 }
 
+variable "skip_final_snapshot" {
+  description = "Whether to skip creating a final snapshot when destroying the Aurora DB"
+  type	      = bool
+  default     = true
+}
+
+variable "final_snapshot_identifier" {
+  description = "Identifier for the final snapshot when destroying the Aurora Cluster"
+  type	      = string
+  default     = ""
+  validation {
+    condition     = var.skip_final_snapshot || trim(var.final_snapshot_identifier) != ""
+    error_message = "When aurora_skip_final_snapshot is false, aurora_final_snapshot_identifier must be a non-empty string."
+  }
+}
+
 # -------------------------------------------------------------------
 # Performance Insights
 # -------------------------------------------------------------------
@@ -198,4 +214,12 @@ variable "enable_http_endpoint" {
   description = "Enable the Aurora Data API (HTTP endpoint) for the cluster."
   type	      = bool
   default     = false
+}
+
+# Send alerts if there are any Aurora issues
+
+variable "event_email" {
+  description = "Email address to receive Aurora/RDS events. If blank, no event subscription"
+  type	      = string
+  default     = ""
 }

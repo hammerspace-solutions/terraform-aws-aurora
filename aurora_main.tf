@@ -27,6 +27,19 @@ data "aws_vpc" "this" {
   id = var.vpc_id
 }
 
+# Lowercase the project name for those resources that require it
+
+locals {
+  project_name_lower    = ${lower(var.project_name)}
+}
+
+# Do we need aurora events?
+
+locals {
+  aurora_events_email   = trimspace(var.event_email)
+  aurora_events_enabled = local.aurora_events_email != ""
+}
+
 # Security Group for Aurora
 resource "aws_security_group" "aurora_sg" {
   name        = "${var.project_name}-aurora-sg"
@@ -58,7 +71,7 @@ resource "aws_security_group" "aurora_sg" {
 
 # DB Subnet Group for Aurora
 resource "aws_db_subnet_group" "aurora_subnets" {
-  name       = "${lower(var.project_name)}-aurora-subnet-group"
+  name       = "${local.project_name_lower}-aurora-subnet-group"
   subnet_ids = [var.subnet_1_id, var.subnet_2_id]
 
   tags = merge(var.tags, {
@@ -68,7 +81,7 @@ resource "aws_db_subnet_group" "aurora_subnets" {
 
 # Aurora Cluster
 resource "aws_rds_cluster" "aurora" {
-  cluster_identifier = "${lower(var.project_name)}-aurora-cluster"
+  cluster_identifier = "${lower.project_name_lower}-aurora-cluster"
 
   engine         = var.engine
   engine_version = length(var.engine_version) > 0 ? var.engine_version : null
@@ -90,6 +103,8 @@ resource "aws_rds_cluster" "aurora" {
 
   deletion_protection = var.deletion_protection
 
+  skip_final_snapshot = var.skip_final_snapshot
+  final_snapshot_identifier = var.skip_final_snapshot ? null : var.final_snapshot_identifier
   copy_tags_to_snapshot = true
 
   tags = merge(var.tags, {
@@ -100,7 +115,7 @@ resource "aws_rds_cluster" "aurora" {
 # Aurora Cluster Instances
 resource "aws_rds_cluster_instance" "aurora_instances" {
   count              = var.instance_count
-  identifier         = "${lower(var.project_name)}-aurora-${count.index + 1}"
+  identifier         = "${lower.project_name_lower}-aurora-${count.index + 1}"
   cluster_identifier = aws_rds_cluster.aurora.id
 
   engine         = var.engine
@@ -116,4 +131,58 @@ resource "aws_rds_cluster_instance" "aurora_instances" {
   tags = merge(var.tags, {
     Name = "${var.project_name}-aurora-${count.index + 1}"
   })
+}
+
+# -------------------------------------------------------------------
+# Optional: Aurora/RDS event notifications via SNS + email
+# Created only if aurora_event_email is non-empty
+# -------------------------------------------------------------------
+
+resource "aws_sns_topic" "aurora_events" {
+  count = local.aurora_events_enabled ? 1 : 0
+
+  name = "${local.project_name_lower}-aurora-events"
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${local.project_name_lower}-aurora-events"
+    }
+  )
+}
+
+resource "aws_sns_topic_subscription" "aurora_events_email" {
+  count = local.aurora_events_enabled ? 1 : 0
+
+  topic_arn = aws_sns_topic.aurora_events[0].arn
+  protocol  = "email"
+  endpoint  = local.aurora_events_email
+}
+
+resource "aws_db_event_subscription" "aurora_events" {
+  count = local.aurora_events_enabled ? 1 : 0
+
+  name      = "${local.project_name_lower}-aurora-events"
+  sns_topic = aws_sns_topic.aurora_events[0].arn
+
+  source_type = "db-cluster"
+  source_ids  = [aws_rds_cluster.aurora.id]
+
+  # Tweak event categories as you like
+  event_categories = [
+    "availability",
+    "backup",
+    "configuration change",
+    "failure",
+    "maintenance",
+  ]
+
+  enabled = true
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${local.project_name_lower}-aurora-events"
+    }
+  )
 }
