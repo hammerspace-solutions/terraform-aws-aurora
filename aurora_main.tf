@@ -165,7 +165,7 @@ resource "aws_db_event_subscription" "aurora_events" {
   name      = "${local.project_name_lower}-aurora-events"
   sns_topic = aws_sns_topic.aurora_events[0].arn
 
-  source_type = "db-cluster"
+  source_type = "db-instance"
   source_ids  = [aws_rds_cluster.aurora.id]
 
   # Tweak event categories as you like
