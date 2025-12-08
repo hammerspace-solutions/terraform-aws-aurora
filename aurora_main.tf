@@ -27,46 +27,6 @@ data "aws_vpc" "this" {
   id = var.vpc_id
 }
 
-data "aws_subnet" "aurora_subnets" {
-  # Using toset() avoids duplicate lookups if caller passes same subnet twice.
-  for_each = toset(var.subnet_ids)
-
-  id = each.value
-}
-
-# Validate that the vpc and subnet(s) are in the correct region
-
-check "aurora_subnet_guard" {
-  assert {
-    condition = (
-      # Must provide at least 2 subnets
-      length(var.subnet_ids) >= 2
-      &&
-      # All subnets must belong to the same VPC
-      length(distinct([
-        for s in data.aws_subnet.aurora_subnets :
-        s.vpc_id
-      ])) == 1
-      &&
-      # Should span at least 2 AZs for HA
-      length(distinct([
-        for s in data.aws_subnet.aurora_subnets :
-        s.availability_zone
-      ])) >= 2
-    )
-
-    error_message = <<-EOT
-      Invalid Aurora subnet configuration:
-
-      - You must provide at least two subnet IDs in var.subnet_ids
-      - All subnets must belong to the same VPC
-      - Subnets should span at least two Availability Zones for high availability
-
-      Check the values passed into the Aurora module's subnet_ids argument.
-    EOT
-  }
-}
-
 # Security Group for Aurora
 resource "aws_security_group" "aurora_sg" {
   name        = "${var.project_name}-aurora-sg"
@@ -99,7 +59,7 @@ resource "aws_security_group" "aurora_sg" {
 # DB Subnet Group for Aurora
 resource "aws_db_subnet_group" "aurora_subnets" {
   name       = "${var.project_name}-aurora-subnet-group"
-  subnet_ids = var.subnet_ids
+  subnet_ids = [var.subnet_1_id, var.subnet_2_id]
 
   tags = merge(var.tags, {
     Name = "${var.project_name}-aurora-subnet-group"

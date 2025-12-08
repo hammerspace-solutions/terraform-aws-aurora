@@ -45,9 +45,16 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "subnet_ids" {
-  description = "List of private subnet IDs for the Aurora DB subnet group (min 2 AZs recommended)"
-  type        = list(string)
+variable "subnet_1_id" {
+  description = "First subnet in which to create the Aurora Database"
+  type	      = string
+  default     = null
+}
+
+variable "subnet_2_id" {
+  description = "Second subnet in which to create the Aurora Database"
+  type	      = string
+  default     = null
 }
 
 variable "vpc_cidr_block" {
