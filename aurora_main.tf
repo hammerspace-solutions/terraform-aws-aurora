@@ -81,7 +81,7 @@ resource "aws_db_subnet_group" "aurora_subnets" {
 
 # Aurora Cluster
 resource "aws_rds_cluster" "aurora" {
-  cluster_identifier = "${lower.project_name_lower}-aurora-cluster"
+  cluster_identifier = "${local.project_name_lower}-aurora-cluster"
 
   engine         = var.engine
   engine_version = length(var.engine_version) > 0 ? var.engine_version : null
@@ -115,7 +115,7 @@ resource "aws_rds_cluster" "aurora" {
 # Aurora Cluster Instances
 resource "aws_rds_cluster_instance" "aurora_instances" {
   count              = var.instance_count
-  identifier         = "${lower.project_name_lower}-aurora-${count.index + 1}"
+  identifier         = "${local.project_name_lower}-aurora-${count.index + 1}"
   cluster_identifier = aws_rds_cluster.aurora.id
 
   engine         = var.engine
