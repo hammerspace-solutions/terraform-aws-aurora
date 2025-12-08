@@ -68,7 +68,7 @@ resource "aws_db_subnet_group" "aurora_subnets" {
 
 # Aurora Cluster
 resource "aws_rds_cluster" "aurora" {
-  cluster_identifier = "${var.project_name}-aurora-cluster"
+  cluster_identifier = "${lower(var.project_name)}-aurora-cluster"
 
   engine         = var.engine
   engine_version = length(var.engine_version) > 0 ? var.engine_version : null
