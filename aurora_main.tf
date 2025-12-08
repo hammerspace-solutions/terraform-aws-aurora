@@ -100,7 +100,7 @@ resource "aws_rds_cluster" "aurora" {
 # Aurora Cluster Instances
 resource "aws_rds_cluster_instance" "aurora_instances" {
   count              = var.instance_count
-  identifier         = "${var.project_name}-aurora-${count.index + 1}"
+  identifier         = "${lower(var.project_name)}-aurora-${count.index + 1}"
   cluster_identifier = aws_rds_cluster.aurora.id
 
   engine         = var.engine
