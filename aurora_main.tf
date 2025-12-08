@@ -80,7 +80,7 @@ resource "aws_security_group" "aurora_sg" {
     protocol	= "tcp"
     cidr_blocks = concat(
       [data.aws_vpc.this.cidr_block],
-      var.allowed_source_cidr_blocks]
+      var.allowed_source_cidr_blocks,
     )
   }
 
