@@ -58,7 +58,7 @@ resource "aws_security_group" "aurora_sg" {
 
 # DB Subnet Group for Aurora
 resource "aws_db_subnet_group" "aurora_subnets" {
-  name       = "${var.project_name}-aurora-subnet-group"
+  name       = "${lower(var.project_name)}-aurora-subnet-group"
   subnet_ids = [var.subnet_1_id, var.subnet_2_id]
 
   tags = merge(var.tags, {
