@@ -1,3 +1,24 @@
+<div align="center">
+
+![Archived](https://img.shields.io/badge/STATUS-ARCHIVED-critical?style=for-the-badge)
+
+# 🚚 This repository has moved
+
+</div>
+
+> [!WARNING]
+> **This GitHub repository is archived and read-only. It is no longer maintained.**
+>
+> The code, full history, branches and tags now live on the internal Hammerspace GitLab:
+>
+> ### ➡️ `gitlab.lab.hammer.space/engineering/research/archive_repos/terraform-aws-aurora`
+>
+> Moved on **2026-10-27**. Please don't open issues or pull requests here.
+>
+> Outside Hammerspace? Contact your Hammerspace representative to request access.
+
+---
+
 # Aurora Terraform Module – Project Houston
 
 This Terraform module provisions an **Amazon Aurora** database cluster for Project Houston, including networking, encryption, performance tuning, and optional event notifications.
